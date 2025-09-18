@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useWallet } from '@/contexts/WalletContext';
-import { Wallet, LogOut, RefreshCw } from 'lucide-react';
+import { Wallet, LogOut, RefreshCw, Smartphone, Monitor } from 'lucide-react';
 import { toast } from 'sonner';
 
 const WalletConnect: React.FC = () => {
@@ -13,13 +14,17 @@ const WalletConnect: React.FC = () => {
     connectWallet, 
     disconnectWallet, 
     chainId, 
-    switchNetwork 
+    switchNetwork,
+    walletType
   } = useWallet();
+  
+  const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false);
 
-  const handleConnect = async () => {
+  const handleConnect = async (walletType: 'metamask' | 'walletconnect') => {
     try {
-      await connectWallet();
-      toast.success('Wallet connected successfully!');
+      await connectWallet(walletType);
+      setIsWalletDialogOpen(false);
+      toast.success(`${walletType === 'metamask' ? 'MetaMask' : 'WalletConnect'} connected successfully!`);
     } catch (error: any) {
       toast.error(error.message || 'Failed to connect wallet');
     }
@@ -49,10 +54,47 @@ const WalletConnect: React.FC = () => {
 
   if (!isConnected) {
     return (
-      <Button onClick={handleConnect} className="flex items-center gap-2">
-        <Wallet className="h-4 w-4" />
-        Connect Wallet
-      </Button>
+      <Dialog open={isWalletDialogOpen} onOpenChange={setIsWalletDialogOpen}>
+        <DialogTrigger asChild>
+          <Button className="flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            Connect Wallet
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect Wallet</DialogTitle>
+            <DialogDescription>
+              Choose your preferred wallet to connect to VaultLend
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Button
+              onClick={() => handleConnect('metamask')}
+              className="w-full flex items-center gap-3 h-12"
+              variant="outline"
+            >
+              <Monitor className="h-5 w-5" />
+              <div className="text-left">
+                <div className="font-medium">MetaMask</div>
+                <div className="text-sm text-muted-foreground">Connect using MetaMask browser extension</div>
+              </div>
+            </Button>
+            
+            <Button
+              onClick={() => handleConnect('walletconnect')}
+              className="w-full flex items-center gap-3 h-12"
+              variant="outline"
+            >
+              <Smartphone className="h-5 w-5" />
+              <div className="text-left">
+                <div className="font-medium">WalletConnect</div>
+                <div className="text-sm text-muted-foreground">Connect using mobile wallet app</div>
+              </div>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   }
 
@@ -84,7 +126,9 @@ const WalletConnect: React.FC = () => {
       <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
         <div className="text-sm">
           <div className="font-medium">{formatAddress(account!)}</div>
-          <div className="text-muted-foreground">{formatBalance(balance)} ETH</div>
+          <div className="text-muted-foreground">
+            {formatBalance(balance)} ETH • {walletType === 'metamask' ? 'MetaMask' : 'WalletConnect'}
+          </div>
         </div>
       </div>
 
