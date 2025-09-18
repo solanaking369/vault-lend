@@ -60,8 +60,9 @@ const Borrow = () => {
                 setShowEncryptedForm(false);
               }} />
             ) : (
-            {/* Progress Steps */}
-            <div className="flex items-center justify-center mb-12">
+              <>
+                {/* Progress Steps */}
+                <div className="flex items-center justify-center mb-12">
               <div className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                   1
@@ -203,6 +204,7 @@ const Borrow = () => {
                 )}
               </CardContent>
             </Card>
+              </>
             )}
           </div>
         </div>
